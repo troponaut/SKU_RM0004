@@ -252,8 +252,9 @@ void lcd_display(uint8_t symbol)
     }
 }
 
-void lcd_display_percentage(uint8_t val, uint16_t color)
+void lcd_display_percentage(uint8_t val, const uint8_t warning, const uint8_t critical)
 {
+    uint16_t color = ST7735_GREEN;
     uint8_t count = 0;
     uint8_t xCoordinate = 30;
     val += 10;
@@ -264,6 +265,8 @@ void lcd_display_percentage(uint8_t val, uint16_t color)
     val /= 10;
     for (count = 0; count < val; count++)
     {
+        if((critical-1) / 10 < count) color = ST7735_RED;
+        else if((warning-1) / 10 < count) color = ST7735_YELLOW;
         lcd_fill_rectangle(xCoordinate, 60, 6, 10, color);
         xCoordinate += 10;
     }
@@ -296,7 +299,7 @@ void lcd_display_cpuLoad(void)
     lcd_write_string(36, 35, "CPU:", Font_11x18, ST7735_WHITE, ST7735_BLACK);
     lcd_write_string(80, 35, cpuStr, Font_11x18, ST7735_WHITE, ST7735_BLACK);
     lcd_write_string(113, 35, "%", Font_11x18, ST7735_WHITE, ST7735_BLACK);
-    lcd_display_percentage(cpuLoad, ST7735_GREEN);
+    lcd_display_percentage(cpuLoad, 60, 90);
 }
 
 void lcd_display_ram(void)
@@ -314,18 +317,21 @@ void lcd_display_ram(void)
     lcd_write_string(36, 35, "RAM:", Font_11x18, ST7735_WHITE, ST7735_BLACK);
     lcd_write_string(80, 35, residueStr, Font_11x18, ST7735_WHITE, ST7735_BLACK);
     lcd_write_string(113, 35, "%", Font_11x18, ST7735_WHITE, ST7735_BLACK);
-    lcd_display_percentage(residue, ST7735_YELLOW);
+    lcd_display_percentage(residue, 80, 90);
 }
 
 void lcd_display_temp(void)
 {
     uint16_t temp = 0;
     uint8_t tempStr[10] = {0};
+    uint16_t tw_color = ST7735_BLUE; // Temperature warning color
     temp = get_temperature();
     sprintf(tempStr, "%d", temp);
+
     lcd_fill_rectangle(0, 35, ST7735_WIDTH, 20, ST7735_BLACK);
     lcd_write_string(30, 35, "TEMP:", Font_11x18, ST7735_WHITE, ST7735_BLACK);
     lcd_write_string(85, 35, tempStr, Font_11x18, ST7735_WHITE, ST7735_BLACK);
+
     if (TEMPERATURE_TYPE == FAHRENHEIT)
     {
         lcd_write_string(118, 35, "F", Font_11x18, ST7735_WHITE, ST7735_BLACK);
@@ -339,7 +345,7 @@ void lcd_display_temp(void)
         temp -= 32;
         temp /= 1.8;
     }
-    lcd_display_percentage((uint16_t)temp, ST7735_RED);
+    lcd_display_percentage((uint16_t)temp, TEMP_WARNING, TEMP_CRITICAL);
 }
 
 void lcd_display_disk(void)
@@ -367,5 +373,5 @@ void lcd_display_disk(void)
     lcd_write_string(30, 35, "DISK:", Font_11x18, ST7735_WHITE, ST7735_BLACK);
     lcd_write_string(85, 35, residueStr, Font_11x18, ST7735_WHITE, ST7735_BLACK);
     lcd_write_string(118, 35, "%", Font_11x18, ST7735_WHITE, ST7735_BLACK);
-    lcd_display_percentage(residue, ST7735_BLUE);
+    lcd_display_percentage(residue, 80, 90);
 }

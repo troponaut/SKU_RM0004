@@ -19,7 +19,9 @@ Description=UCtronics Display
 After=multi-user.target
 
 [Service]
+WorkingDirectory=$(pwd)
 ExecStart=/bin/sh -c "'$exe_path'"
+Restart=always
 
 [Install]
 WantedBy=multi-user.target
@@ -92,30 +94,24 @@ if [ $converted_version -ge 12 ]; then
     BOOT_CONFIG="/boot/firmware/config.txt"
 fi
 
+preparation_steps() {
+
+    echo "Make sure you have the following prerequisites set on /boot/config.txt"
+    echo
+    echo 'Raspberry Pi 5'
+    echo '------------------------'
+    echo 'dtoverlay=gpio-shutdown,gpio_pin=4,active_low=1,gpio_pull=up,debounce=1000'
+    echo 'dtparam=i2c_arm=on,i2c_arm_baudrate=400000'
+    echo
+    echo 'Raspberry Pi 4'
+    echo '------------------------'
+    echo 'dtoverlay=gpio-shutdown,gpio_pin=4,active_low=1,gpio_pull=up'
+    echo 'dtparam=i2c_arm=on,i2c_arm_baudrate=400000'
+
+}
 
 if detect_pi_model; then
-    if [[ $(detect_pi_model) == *"Raspberry Pi 5"* ]]; then
-        echo "Adding overlay configuration for Raspberry Pi 5"
-        if [ `grep -c "gpio-shutdown,gpio_pin=4" $BOOT_CONFIG` -lt '1' ]; then
-            sudo bash -c "echo dtoverlay=gpio-shutdown,gpio_pin=4,active_low=1,gpio_pull=up,debounce=1000 >> $BOOT_CONFIG"
-        fi
-    elif [[ $(detect_pi_model) == *"Raspberry Pi 4"* ]]; then
-        echo "Adding overlay configuration for Raspberry Pi 4"
-        if [ `grep -c "gpio-shutdown,gpio_pin=4" $BOOT_CONFIG` -lt '1' ]; then
-            sudo bash -c "echo dtoverlay=gpio-shutdown,gpio_pin=4,active_low=1,gpio_pull=up >> $BOOT_CONFIG"
-        fi
-    fi
-fi
-
-
-if [ `grep -c "dtparam=i2c_arm=on,i2c_arm_baudrate=400000" $BOOT_CONFIG` -lt '1' ];then
-    if [ `grep -c "#dtparam=i2c_arm=on" $BOOT_CONFIG` -ne '0' ];then
-        sudo sed -i "s/\(^#dtparam=i2c_arm=on\)/dtparam=i2c_arm=on,i2c_arm_baudrate=400000/" $BOOT_CONFIG
-    elif [ `grep -c "dtparam=i2c_arm=on" $BOOT_CONFIG` -ne '0' ]; then
-        sudo sed -i "s/\(^dtparam=i2c_arm=on\)/dtparam=i2c_arm=on,i2c_arm_baudrate=400000/" $BOOT_CONFIG
-    else 
-        sudo bash -c "echo -e '\ndtparam=i2c_arm=on,i2c_arm_baudrate=400000' >> $BOOT_CONFIG"
-    fi
+    preparation_steps
 fi
 
 # Deploy the function service
