@@ -96,16 +96,8 @@ fi
 
 preparation_steps() {
 
-    echo "Make sure you have the following prerequisites set on /boot/config.txt"
-    echo
-    echo 'Raspberry Pi 5'
-    echo '------------------------'
+    echo 'Make sure you have the following prerequisites set on /boot/config.txt'
     echo 'dtoverlay=gpio-shutdown,gpio_pin=4,active_low=1,gpio_pull=up,debounce=1000'
-    echo 'dtparam=i2c_arm=on,i2c_arm_baudrate=400000'
-    echo
-    echo 'Raspberry Pi 4'
-    echo '------------------------'
-    echo 'dtoverlay=gpio-shutdown,gpio_pin=4,active_low=1,gpio_pull=up'
     echo 'dtparam=i2c_arm=on,i2c_arm_baudrate=400000'
 
 }
